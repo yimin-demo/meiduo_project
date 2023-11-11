@@ -15,23 +15,29 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 
 from django.http import HttpResponse
 
+from utils.converters import UsernameConverter
+from django.urls import register_converter
 
-def log(request):
+register_converter(UsernameConverter,'username')
 
-    import logging
-    logger = logging.getLogger('django')
-    logger.info('login')
-    logger.warning('redis out of memory')
-    logger.error('error')
-    logger.debug('~~~~~')
 
-    return HttpResponse('log')
+# def log(request):
+
+#     import logging
+#     logger = logging.getLogger('django')
+#     logger.info('login')
+#     logger.warning('redis out of memory')
+#     logger.error('error')
+#     logger.debug('~~~~~')
+
+#     return HttpResponse('log')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('log/', log),
+    # path('log/', log),
+    path('', include('apps.users.urls')),
 ]
