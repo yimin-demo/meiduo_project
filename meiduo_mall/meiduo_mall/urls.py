@@ -19,10 +19,11 @@ from django.urls import path, include
 
 from django.http import HttpResponse
 
-from utils.converters import UsernameConverter
+from utils.converters import UsernameConverter, MobileConverter
 from django.urls import register_converter
 
 register_converter(UsernameConverter,'username')
+register_converter(MobileConverter, 'mobile')
 
 
 # def log(request):
