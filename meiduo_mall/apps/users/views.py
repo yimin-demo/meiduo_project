@@ -5,6 +5,7 @@ from django.views import View
 from apps.users.models import User
 from django.http import JsonResponse
 from django import http
+from django.contrib.auth import login
 
 import re
 import json
@@ -75,5 +76,8 @@ class RegisterView(View):
                                             mobile=mobile)
         except Exception as e:
             return http.JsonResponse({'code': 400, 'errmsg': '注册失败!'})    
+        
+        login(request, user)
 
         return http.JsonResponse({'code': 0, 'errmsg': '注册成功!'})
+
