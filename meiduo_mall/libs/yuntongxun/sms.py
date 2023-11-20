@@ -8,7 +8,8 @@ def send_message(tid='1', mobile='18962321668', datas=('1234', '5')):
     sdk = SmsSDK(accId, accToken, appId)
     # 【云通讯】您的验证码是{1}，请于{2}分钟内正确输入。其中{1}和{2}为短信模板参数。
     resp = sdk.sendMessage(tid, mobile, datas)
-    if resp.get('SMSCodeView') == '000000':
+    resp = eval(resp)
+    if resp.get('statusCode') == '000000':
         return 0
     else:
         return -1
