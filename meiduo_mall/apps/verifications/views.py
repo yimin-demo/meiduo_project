@@ -54,21 +54,40 @@ class SMSCodeView(View):
         redis_image_code = redis_conn.get(uuid)
         if redis_image_code is None:
             return JsonResponse({'code':400, 'errmsg':'图片验证码已过期'})
+        
+        # 删除图形验证码，避免恶意测试图形验证码
+        try:
+            redis_conn.delete(uuid)
+        except Exception as e:
+            logger.error(e)
+        # verify image code
         if redis_image_code.decode().lower() != image_code.lower(): 
             return JsonResponse({'code':400, 'errmsg': '图片验证码错误'})
         
+        # extract send mobile flag
+        send_flag = redis_conn.get('send_flag_%s'%mobile)
+        if send_flag is not None:
+            return JsonResponse({'code': 400, 'errmsg': '发送短信过于频繁'})
+
         # 4. generate sms code
-        # sms_code = '%06d'%randint(100000,999999)
         sms_code = randint(1000, 9999)
         logger.info(sms_code)
 
+        ## using pipeline to save data
+        pl = redis_conn.pipeline()
         # 5. save sms code
-        redis_conn.setex(mobile, 300, sms_code)
+        pl.setex(mobile, 300, sms_code)
+        # add sending flag
+        pl.setex('send_flag_%s'%mobile, 60, 1)
+        ## execute pipeline
+        pl.execute()
         
         # 6. send sms code
         from libs.yuntongxun.sms import send_message
-        resp = send_message(mobile=str(mobile), datas=(str(sms_code), '5'))
-        print(resp)
+        send_message(mobile=str(mobile), datas=(str(sms_code), '5'))
 
         # 7. return response
         return JsonResponse({'code':0, 'errmsg': '发送短信成功'})
+
+
+## 倒计时改进
