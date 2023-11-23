@@ -4,5 +4,5 @@ from celery import Celery
 import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "meiduo_mall.settings")
 
-celery_app = Celery('meiduo')
-celery_app.config_from_object('meiduo.config')
+app = Celery('meiduo')
+app.config_from_object('meiduo.config')
