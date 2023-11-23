@@ -6,6 +6,7 @@ from apps.users.models import User
 from django.http import JsonResponse
 from django import http
 from django.contrib.auth import login
+from django_redis import get_redis_connection
 
 import re
 import json
@@ -48,6 +49,7 @@ class RegisterView(View):
         password = json_dict.get('password')
         password2 = json_dict.get('password2')
         mobile = json_dict.get('mobile')
+        sms_code = json_dict.get('sms_code')
         allow = json_dict.get('allow')
 
         # 3. validate
@@ -70,12 +72,21 @@ class RegisterView(View):
         if allow != True:
             return http.JsonResponse({'code': 400, 'errmsg': 'allow格式有误!'})
         
+        # verify sms code
+        redis_conn = get_redis_connection('code')
+        redis_sms_code = redis_conn.get(mobile)
+        if not redis_sms_code:
+            return http.JsonResponse({'code':400, 'errmsg':'短信验证码失效'})
+        if sms_code != redis_sms_code.decode():
+            return http.JsonResponse({'code': 400, 'errmsg': '短信验证码有误'})
+        
         try:
             user = User.objects.create_user(username=username,
                                             password=password,
                                             mobile=mobile)
         except Exception as e:
             return http.JsonResponse({'code': 400, 'errmsg': '注册失败!'})    
+
         
         login(request, user)
 
