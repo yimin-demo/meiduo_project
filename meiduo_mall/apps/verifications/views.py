@@ -83,8 +83,11 @@ class SMSCodeView(View):
         pl.execute()
         
         # 6. send sms code
-        from libs.yuntongxun.sms import send_message
-        send_message(mobile=str(mobile), datas=(str(sms_code), '5'))
+        # from libs.yuntongxun.sms import send_message
+        # send_message(mobile=str(mobile), datas=(str(sms_code), '5'))
+
+        from celery_tasks.sms.tasks import celery_send_sms_code
+        celery_send_sms_code.delay(mobile=str(mobile), datas=(str(sms_code), '5'))
 
         # 7. return response
         return JsonResponse({'code':0, 'errmsg': '发送短信成功'})
