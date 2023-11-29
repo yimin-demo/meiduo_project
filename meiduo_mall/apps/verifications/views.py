@@ -50,7 +50,7 @@ class SMSCodeView(View):
             return JsonResponse({'code':400, 'errmsg':'参数不全'})
 
         # 3. verify image captcha
-        redis_conn = get_redis_connection('code')
+        redis_conn = get_redis_connection('codecreate_user')
         redis_image_code = redis_conn.get(uuid)
         if redis_image_code is None:
             return JsonResponse({'code':400, 'errmsg':'图片验证码已过期'})
@@ -86,6 +86,9 @@ class SMSCodeView(View):
         # from libs.yuntongxun.sms import send_message
         # send_message(mobile=str(mobile), datas=(str(sms_code), '5'))
 
+        ## run
+        ## cd ~/meiduo_project/meiduo_mall
+        ## celery -A celery_tasks.main worker -l info
         from celery_tasks.sms.tasks import celery_send_sms_code
         celery_send_sms_code.delay(mobile=str(mobile), datas=(str(sms_code), '5'))
 
