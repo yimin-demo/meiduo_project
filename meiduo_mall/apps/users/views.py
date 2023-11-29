@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.views import View
 from apps.users.models import User
 from django.http import JsonResponse
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django_redis import get_redis_connection
 from django.http import HttpRequest
 
@@ -129,4 +129,27 @@ class LoginView(View):
         else:
             request.session.set_expiry(None)
 
-        return JsonResponse({'code': 0, 'errmsg': 'ok'})
+        # 6. return response
+        response = JsonResponse({'code': 0, 'errmsg': 'ok'})
+
+        # 7. set cookie
+        response.set_cookie('username', username)
+
+        return response
+
+
+class LogoutView(View):
+
+    def delete(self, request):
+
+        # clear session
+        logout(request)
+
+        # logout, return response and redirect
+        response = JsonResponse({'code':0,
+                                 'errmsg':'ok'})
+        
+        # clear cookie
+        response.delete_cookie('username')
+
+        return response
