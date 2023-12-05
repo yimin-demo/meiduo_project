@@ -7,6 +7,8 @@ from django.http import JsonResponse
 from django.contrib.auth import login, logout
 from django_redis import get_redis_connection
 from django.http import HttpRequest
+from django.contrib.auth.mixins import LoginRequiredMixin
+from utils.views import LoginRequiredJSONMixin
 
 import re
 import json
@@ -153,3 +155,21 @@ class LogoutView(View):
         response.delete_cookie('username')
 
         return response
+
+## no hand appeared when I move cursor to quit
+
+
+class CenterView(LoginRequiredJSONMixin, View):
+    
+    def get(self, request):
+        """提供个人信息界面"""
+        return JsonResponse({
+            'code': 0, 
+            'errmsg': '个人中心',
+             "info_data":{
+                    "username":"itcast",
+                    "mobile": "18310820688",
+                    "email": "",
+                    "email_active": 'true'
+                }
+            })
